@@ -4,6 +4,7 @@ import {
   getCustomerBookings,
   getTechnicianBookings,
     updateBookingStatus,
+    cancelBooking,
 } from "../controllers/booking.controller.js";
 
 import {
@@ -42,5 +43,12 @@ router.patch(
   authenticateUser,
   authorizeRoles("technician"),
   updateBookingStatus
+);
+// Customer - Cancel Booking
+router.patch(
+  "/:id/cancel",
+  authenticateUser,
+  authorizeRoles("customer"),
+  cancelBooking
 );
 export default router;

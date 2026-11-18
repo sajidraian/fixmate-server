@@ -281,3 +281,66 @@ if (typeof id !== "string") {
     });
   }
 };
+// Cancel Booking (Customer)
+export const cancelBooking = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const id = req.params.id;
+
+    if (typeof id !== "string" || !ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid booking ID.",
+      });
+    }
+
+    const db = getDB();
+
+    const booking = await db.collection("bookings").findOne({
+      _id: new ObjectId(id),
+      customerEmail: req.user?.email,
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    if (booking.status !== "requested") {
+      return res.status(400).json({
+        success: false,
+        message: "Only requested bookings can be cancelled.",
+      });
+    }
+
+    await db.collection("bookings").updateOne(
+      {
+        _id: new ObjectId(id),
+        customerEmail: req.user?.email,
+        status: "requested",
+      },
+      {
+        $set: {
+          status: "cancelled",
+          updatedAt: new Date(),
+        },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking cancelled successfully!",
+    });
+  } catch (error) {
+    console.error("Cancel Booking Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to cancel booking.",
+    });
+  }
+};
