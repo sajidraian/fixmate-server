@@ -1,13 +1,19 @@
+
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+
 import { connectDB } from "./config/database.js";
+
 import serviceRoutes from "./routes/service.routes.js";
+import userRoutes from "./routes/user.routes.js";
+import bookingRoutes from "./routes/booking.routes.js";
 
 dotenv.config();
 
 const app = express();
 
+// Middleware
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -17,16 +23,20 @@ app.use(
 
 app.use(express.json());
 
-// Home route
+// Home Route
 app.get("/", (req, res) => {
   res.send("FixMate Server is Running Successfully!");
 });
 
-// Services API
+// API Routes
 app.use("/api/services", serviceRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/bookings", bookingRoutes);
 
+// Server Port
 const PORT = process.env.PORT || 5000;
 
+// Start Server
 const startServer = async () => {
   try {
     await connectDB();
