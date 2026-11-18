@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createBooking, getCustomerBookings, getTechnicianBookings, } from "../controllers/booking.controller.js";
+import { createBooking, getCustomerBookings, getTechnicianBookings, updateBookingStatus, } from "../controllers/booking.controller.js";
 import { authenticateUser, authorizeRoles, } from "../middleware/auth.middleware.js";
 const router = Router();
 // Customer - Create Booking
@@ -8,4 +8,6 @@ router.post("/", authenticateUser, authorizeRoles("customer"), createBooking);
 router.get("/my", authenticateUser, authorizeRoles("customer"), getCustomerBookings);
 // Technician - Get Assigned Bookings
 router.get("/technician", authenticateUser, authorizeRoles("technician"), getTechnicianBookings);
+// Technician - Update Booking Status
+router.patch("/:id/status", authenticateUser, authorizeRoles("technician"), updateBookingStatus);
 export default router;

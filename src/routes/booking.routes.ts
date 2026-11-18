@@ -3,6 +3,7 @@ import {
   createBooking,
   getCustomerBookings,
   getTechnicianBookings,
+    updateBookingStatus,
 } from "../controllers/booking.controller.js";
 
 import {
@@ -35,5 +36,11 @@ router.get(
   authorizeRoles("technician"),
   getTechnicianBookings
 );
-
+// Technician - Update Booking Status
+router.patch(
+  "/:id/status",
+  authenticateUser,
+  authorizeRoles("technician"),
+  updateBookingStatus
+);
 export default router;
