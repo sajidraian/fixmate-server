@@ -188,3 +188,96 @@ export const getTechnicianBookings = async (
     });
   }
 };
+// Update Booking Status (Technician)
+export const updateBookingStatus = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const id = req.params.id;
+
+if (typeof id !== "string") {
+  return res.status(400).json({
+    success: false,
+    message: "Invalid booking ID.",
+  });
+}
+    const { status, finalAmount } = req.body;
+
+    const allowedStatuses = [
+      "accepted",
+      "rejected",
+      "in-progress",
+      "completed",
+    ];
+
+    if (!ObjectId.isValid(id) || !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid booking ID or status.",
+      });
+    }
+
+    const db = getDB();
+
+    const booking = await db.collection("bookings").findOne({
+      _id: new ObjectId(id),
+      technicianEmail: req.user?.email,
+    });
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    const allowedTransitions: Record<string, string[]> = {
+      requested: ["accepted", "rejected"],
+      accepted: ["in-progress"],
+      "in-progress": ["completed"],
+    };
+
+    if (!allowedTransitions[booking.status]?.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "This status update is not allowed.",
+      });
+    }
+
+    const updateData: Record<string, unknown> = {
+      status,
+      updatedAt: new Date(),
+    };
+
+    if (status === "completed") {
+      const amount = Number(finalAmount);
+
+      if (!Number.isFinite(amount) || amount <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Please provide a valid final amount.",
+        });
+      }
+
+      updateData.finalAmount = amount;
+    }
+
+    await db.collection("bookings").updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updateData }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking status updated successfully!",
+    });
+  } catch (error) {
+    console.error("Update Booking Status Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update booking status.",
+    });
+  }
+};
