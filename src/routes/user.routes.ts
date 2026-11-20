@@ -5,20 +5,18 @@ import {
   AuthenticatedRequest,
 } from "../middleware/auth.middleware.js";
 
+import {
+  getMyProfile,
+  updateMyProfile,
+} from "../controllers/user.controller.js";
+
 const router = Router();
 
-// Logged-in User Profile
-router.get(
-  "/me",
-  authenticateUser,
-  (req: AuthenticatedRequest, res) => {
-    res.status(200).json({
-      success: true,
-      message: "User profile fetched successfully",
-      data: req.user,
-    });
-  }
-);
+// Get logged-in user profile
+router.get("/me", authenticateUser, getMyProfile);
+
+// Update logged-in user profile
+router.patch("/profile", authenticateUser, updateMyProfile);
 
 // Customer Only
 router.get(
@@ -26,10 +24,7 @@ router.get(
   authenticateUser,
   authorizeRoles("customer"),
   (req, res) => {
-    res.json({
-      success: true,
-      message: "Customer access granted!",
-    });
+    res.json({ success: true, message: "Customer access granted!" });
   }
 );
 
@@ -39,10 +34,7 @@ router.get(
   authenticateUser,
   authorizeRoles("technician"),
   (req, res) => {
-    res.json({
-      success: true,
-      message: "Technician access granted!",
-    });
+    res.json({ success: true, message: "Technician access granted!" });
   }
 );
 
@@ -52,10 +44,7 @@ router.get(
   authenticateUser,
   authorizeRoles("admin"),
   (req, res) => {
-    res.json({
-      success: true,
-      message: "Admin access granted!",
-    });
+    res.json({ success: true, message: "Admin access granted!" });
   }
 );
 
